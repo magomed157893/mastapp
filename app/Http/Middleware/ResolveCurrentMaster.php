@@ -11,12 +11,16 @@ class ResolveCurrentMaster
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $masterId = $request->header('X-Master-Id');
+        $master = Master::find($request->header('X-Master-Id'));
 
-        if (!empty($masterId)) {
-            $request->attributes->set('current_master', Master::find($masterId));
+        if (is_null($master)) {
+            return response()->json(
+                ['message' => 'Current master not found'],
+                Response::HTTP_UNAUTHORIZED
+            );
         }
 
+        $request->attributes->set('current_master', $master);
         return $next($request);
     }
 }
